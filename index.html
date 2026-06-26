@@ -162,7 +162,7 @@ td.bad{color:#fca5a5}
 <div class="section" id="checker">
   <div class="card">
     <h2>💰 Balance Checker</h2>
-    <div class="sub">Paste card numbers (one per line). ERR wale cards automatic retry honge — max 3 baar.</div>
+    <div class="sub">Paste card numbers (one per line). ERR wale cards automatic retry honge — max 20 baar.</div>
     <textarea id="cards" placeholder="1001340043075899&#10;1001340040344056&#10;..."></textarea>
     <div class="row">
       <button class="btn b-primary big" id="checkBtn" onclick="cRun()">🔍 Check Balance</button>
@@ -199,8 +199,8 @@ td.bad{color:#fca5a5}
 <script>
 const CHECK_API = "https://croma-app-1-31gtbzrnb-otherwise390-2311s-projects.vercel.app/api/check";
 const MAX_RETRIES = 20;
-const BATCH_SIZE = 50;
-const RETRY_DELAY_MS = 100;
+const BATCH_SIZE = 1000;
+const RETRY_DELAY_MS = 10;
 
 function show(id){
   document.getElementById('home').style.display='none';

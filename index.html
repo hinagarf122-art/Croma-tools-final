@@ -403,7 +403,7 @@ function renderTable(){
 
   cResults.forEach((r, idx)=>{
     const isDup = dupSet.has(r.card);
-    const invalid = isResolved(r) && (r.status == null && r.expiry == null && r.balance == null);
+    const invalid = isResolved(r) && (r.status == null && r.expiry == null);
     let cell;
 
     if(!isResolved(r)){
@@ -411,7 +411,7 @@ function renderTable(){
       pending++;
     } else if(invalid){
       r.invalid = true; iv++;
-      cell = `<td class="bad">Invalid Gift Card</td>`;
+      cell = `<td class="bad">❌ Invalid Gift Card</td>`;
     } else {
       const bal = r.balance;
       if(bal === 0) zero++; else if(bal > 0){ nz++; totalAmt += bal; }

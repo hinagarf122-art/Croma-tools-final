@@ -27,33 +27,64 @@
   --red:#ef4444;
   --amber:#f59e0b;
   --cyan:#06b6d4;
-  --blue:#3b82f6}
+  --blue:#3b82f6;
+}
 html,body{height:100%}
-body{font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);background-image:radial-gradient(circle at 20% 0%,rgba(168,85,247,.25),transparent 50%),radial-gradient(circle at 80% 100%,rgba(236,72,153,.2),transparent 50%);background-attachment:fixed;color:var(--text);min-height:100vh;font-size:15px}
-.shell{max-width:560px;margin:0 auto;padding:18px}
+body{
+  font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);
+  background-image:
+    radial-gradient(circle at 20% 0%,rgba(168,85,247,.25),transparent 50%),
+    radial-gradient(circle at 80% 100%,rgba(236,72,153,.2),transparent 50%);
+  background-attachment:fixed;
+  color:var(--text);
+  min-height:100vh;
+  font-size:15px;
+}
+.shell{max-width:560px;margin:0 auto;padding:18px;}
+
+/* ===== HEADER ===== */
 .head{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-top:8px}
-.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 24px rgba(168,85,247,.4)}
+.logo{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  box-shadow:0 8px 24px rgba(168,85,247,.4);
+}
 .head h1{font-size:22px;font-weight:800;background:linear-gradient(90deg,#fff,#e9d5ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .head .tag{font-size:12px;color:var(--muted);margin-top:2px}
 .back{display:none;align-items:center;gap:6px;background:var(--card);color:var(--text);padding:8px 14px;border-radius:10px;border:1px solid var(--border);font-size:14px;font-weight:600;cursor:pointer;margin-right:auto}
 .back.show{display:inline-flex}
+
+/* ===== HOME TILES ===== */
 #home{display:block}
 .welcome{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;text-align:center}
 .welcome .big{font-size:18px;font-weight:700;margin-bottom:4px}
 .welcome .small{font-size:12px;color:var(--muted)}
-.tile{display:block;width:100%;padding:22px 18px;margin:12px 0;border-radius:18px;border:0;font-size:17px;font-weight:700;text-align:left;cursor:pointer;box-shadow:0 8px 28px rgba(0,0,0,.4);position:relative;overflow:hidden;color:#fff}
+.tile{
+  display:block;width:100%;padding:22px 18px;margin:12px 0;border-radius:18px;border:0;
+  font-size:17px;font-weight:700;text-align:left;cursor:pointer;
+  box-shadow:0 8px 28px rgba(0,0,0,.4);
+  position:relative;overflow:hidden;color:#fff;
+}
 .tile::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:34px;opacity:.6}
 .tile .emoji{font-size:36px;display:block;margin-bottom:8px}
 .tile .desc{font-size:12px;font-weight:500;opacity:.9;display:block;margin-top:6px;line-height:1.4}
 .tile-1{background:linear-gradient(135deg,#10b981,#059669)}
 .tile-2{background:linear-gradient(135deg,#a855f7,#ec4899)}
 .tile:active{transform:scale(.98)}
+
+/* ===== SECTIONS ===== */
 .section{display:none}
 .section.active{display:block}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
 .section h2{font-size:18px;color:#fff;margin-bottom:6px}
 .sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.4}
-textarea{width:100%;min-height:150px;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-soft);color:var(--text);font-size:15px;font-family:ui-monospace,monospace;resize:vertical}
+textarea{
+  width:100%;min-height:150px;padding:12px;border-radius:12px;
+  border:1px solid var(--border);background:var(--bg-soft);color:var(--text);
+  font-size:15px;font-family:ui-monospace,monospace;resize:vertical;
+}
 textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(168,85,247,.2)}
 .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 button.btn{flex:1;min-width:120px;padding:13px 10px;border:0;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;transition:transform .1s}
@@ -67,6 +98,8 @@ button.btn:active{transform:scale(.96)}
 .b-red{background:var(--red);color:#fff}
 .b-purple{background:#7c3aed;color:#fff}
 .b-wa{background:#25d366;color:#fff}
+
+/* ===== TABLE ===== */
 table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
 th,td{border-bottom:1px solid var(--border);padding:9px 6px;text-align:left;font-family:ui-monospace,monospace;word-break:break-all}
 th{background:var(--bg-soft);color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
@@ -74,6 +107,8 @@ td{background:transparent}
 tr:hover td{background:var(--card-hi)}
 td.bad{color:#fca5a5}
 .zero{color:#f87171;font-weight:700}.ok{color:#4ade80;font-weight:700}
+
+/* ===== MISC ===== */
 .count{font-size:13px;color:var(--muted);margin-top:10px;font-weight:600}
 .hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;opacity:.8}
 #debug{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:10px;font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;display:none;color:#fbbf24;max-height:300px;overflow:auto}
@@ -90,6 +125,7 @@ td.bad{color:#fca5a5}
 <body>
 <div class="shell">
 
+<!-- ===== HEADER ===== -->
 <div class="head">
   <button class="back" id="backBtn" onclick="showHome()">←</button>
   <div class="logo">🎁</div>
@@ -100,6 +136,7 @@ td.bad{color:#fca5a5}
   </div>
 </div>
 
+<!-- ===== HOME ===== -->
 <div id="home">
   <div class="welcome">
     <div class="big">👋 Welcome To Kartik Tool'S</div>
@@ -121,6 +158,7 @@ td.bad{color:#fca5a5}
   <div class="foot">v3.0 · 🎁 Croma Tools</div>
 </div>
 
+<!-- ===== FORMATTER ===== -->
 <div class="section" id="formatter">
   <div class="card">
     <h2>✨ Format Setter</h2>
@@ -148,16 +186,17 @@ td.bad{color:#fca5a5}
   <div id="debug"></div>
 </div>
 
+<!-- ===== CHECKER ===== -->
 <div class="section" id="checker">
   <div class="card">
     <h2>💰 Balance Checker</h2>
     <div class="sub">Paste card numbers (one per line). Tool will check balance for each.</div>
     <textarea id="cards" placeholder="1001340043075899&#10;1001340040344056&#10;..."></textarea>
     <div class="row">
-      <button class="btn b-primary big" id="checkBtn" onclick="cRun()">🔍 Check Balance</button>
+      <button class="btn b-primary big" onclick="cRun()">🔍 Check Balance</button>
     </div>
     <div class="bar"><div id="prog"></div></div>
-    <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted); font-weight: bold;"></div>
+    <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted)"></div>
     <div id="totalBox" style="display:none;margin-top:14px;padding:16px;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;text-align:center;box-shadow:0 8px 24px rgba(16,185,129,.35)">
       <div style="font-size:12px;opacity:.9;font-weight:600;letter-spacing:.5px;text-transform:uppercase">💰 Total Worth</div>
       <div id="totalAmt" style="font-size:28px;font-weight:900;margin-top:4px">₹0</div>
@@ -306,167 +345,85 @@ const fIp=document.getElementById('fInput');
 fIp.value=localStorage.getItem('croma_last')||'';
 fIp.addEventListener('input',()=>localStorage.setItem('croma_last',fIp.value));
 
-/* ===== CHECKER: INFINITE REAL-TIME PUMP LOOP ENGINE ===== */
-let cResults = {}; 
-let dupSetGlobal = new Set();
-let globalTotalUnique = 0;
-let globalSuccessCount = 0;
-
+/* ===== CHECKER ===== */
+let cResults=[];
 async function cCheck(card){
   try{
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 7000); // 7s tight timeout for quick rotation
-    const r = await fetch(CHECK_API, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({card}),
-      signal: controller.signal
-    });
-    clearTimeout(id);
-    const data = await r.json();
-    if (!data || data.error || (data.status == null && data.expiry == null && data.balance == null)) {
-      return { card, isError: true }; 
-    }
-    return data;
-  }catch(e){
-    return {card, isError: true}; 
-  }
+    const r=await fetch(CHECK_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card})});
+    return await r.json();
+  }catch(e){return {card,error:String(e)};}
 }
-
 async function cRun(){
-  const raw = document.getElementById('cards').value;
-  const allMatches = raw.match(/\d{16}/g) || [];
-  if (!allMatches.length) { toast('No 16-digit numbers found', 'var(--red)'); return; }
-  
-  document.getElementById('checkBtn').disabled = true;
-  document.getElementById('checkBtn').innerText = "⚡ Real-time Pump Active...";
-  
-  const seen = {}; 
-  dupSetGlobal.clear();
-  allMatches.forEach(c => { seen[c] = (seen[c] || 0) + 1; if (seen[c] > 1) dupSetGlobal.add(c); });
-  
-  let targetCards = [...new Set(allMatches)];
-  globalTotalUnique = targetCards.length;
-  globalSuccessCount = 0;
-  
-  const dupCount = dupSetGlobal.size;
-  if (dupCount > 0) { toast(`⚠️ ${dupCount} duplicate card(s) skipped`, 'var(--amber)'); }
-  
-  cResults = {};
-  targetCards.forEach(c => { cResults[c] = { card: c, balance: undefined, pending: true, rowId: null }; });
-  
-  document.getElementById('cTb').innerHTML = '';
-  document.getElementById('cTbl').style.display = 'table';
-  document.getElementById('stats').style.display = 'flex';
-  document.getElementById('totalBox').style.display = 'block';
-  document.getElementById('cActions').style.display = 'none';
-  document.getElementById('dup').textContent = dupCount;
-  
-  let sharedQueue = [...targetCards];
-  let totalErrorsCurrently = 0;
-  const maxThreads = 15; // Parallel workers
-
-  const updateStatusText = () => {
-    document.getElementById('cStatus').innerHTML = `🚀 Active Queue: ${sharedQueue.length} cards remaining | 🔄 Live Retries Loop: ${totalErrorsCurrently} blocks pushing back`;
-  };
-
-  const workerLanes = Array(maxThreads).fill(null).map(async () => {
-    while (sharedQueue.length > 0) {
-      updateStatusText();
-      const card = sharedQueue.shift();
-      if (!card) break;
-      
-      const res = await cCheck(card);
-      
-      if (res.isError) {
-        // ERR ya BLOCK aate hi card ko TURANT queue ke peeche wapas daal do (PUSH BACK SYSTEM)
-        totalErrorsCurrently++;
-        sharedQueue.push(card); 
-      } else {
-        if (cResults[card].pending) {
-          cResults[card] = res;
-          cResults[card].pending = false;
-          globalSuccessCount++;
-          if(totalErrorsCurrently > 0) totalErrorsCurrently--;
-          cRenderSingleUpdate(res);
-        }
-      }
-    }
-  });
-
-  await Promise.all(workerLanes);
-
-  document.getElementById('cStatus').textContent = `✅ All allocations confirmed successfully! Zero blocks left in the pump.`;
-  document.getElementById('checkBtn').disabled = false;
-  document.getElementById('checkBtn').innerText = "🔍 Check Balance";
-  document.getElementById('cActions').style.display = 'flex';
-  toast(`✅ Checked Everything Completely!`);
-}
-
-function cRenderSingleUpdate(r) {
-  const bal = r.balance;
-  const isDup = dupSetGlobal.has(r.card);
-  const invalid = (r.status == null && r.expiry == null && bal == null);
-
-  let cell;
-  if (invalid) {
-    r.invalid = true;
-    cell = `<td class="bad">Invalid Gift Card</td>`;
-  } else {
-    cell = `<td class="${bal > 0 ? 'ok' : 'zero'}">₹${bal.toLocaleString('en-IN')}</td>`;
+  const raw=document.getElementById('cards').value;
+  const allMatches=raw.match(/\d{16}/g)||[];
+  if(!allMatches.length){toast('No 16-digit numbers found','var(--red)');return;}
+  const seen={};const dupSet=new Set();
+  allMatches.forEach(c=>{seen[c]=(seen[c]||0)+1;if(seen[c]>1)dupSet.add(c);});
+  const cards=[...new Set(allMatches)];
+  const dupCount=dupSet.size;
+  if(dupCount>0){
+    toast(`⚠️ ${dupCount} duplicate card(s) found & skipped`,'var(--amber)');
   }
-
-  const tr = document.createElement('tr');
-  const dupBadge = isDup ? ` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>` : '';
-  
-  const currentRowsCount = document.querySelectorAll('#cTb tr').length + 1;
-  tr.innerHTML = `<td>${currentRowsCount}</td><td>${r.card}${dupBadge}</td>${cell}`;
-  document.getElementById('cTb').appendChild(tr);
-  
-  cRecalculateHeaderCounters();
+  cResults=[];
+  const tb=document.getElementById('cTb');tb.innerHTML='';
+  document.getElementById('cTbl').style.display='table';
+  document.getElementById('stats').style.display='flex';
+  document.getElementById('totalBox').style.display='block';
+  document.getElementById('cActions').style.display='none';
+  document.getElementById('dup').textContent=dupCount;
+  const total=cards.length;let done=0,zero=0,nz=0,iv=0,totalAmt=0;
+  const batch=100;
+  for(let i=0;i<cards.length;i+=batch){
+    const chunk=cards.slice(i,i+batch);
+    const res=await Promise.all(chunk.map(cCheck));
+    res.forEach(r=>{
+      cResults.push(r);done++;
+      const bal=r.balance;
+      const invalid=(r.status==null && r.expiry==null);
+      const isDup=dupSet.has(r.card);
+      let cell;
+      if(r.error!==undefined){
+        cell=`<td class="bad">ERR</td>`;
+      }else if(invalid){
+        r.invalid=true;iv++;
+        cell=`<td class="bad">Invalid Gift Card</td>`;
+      }else{
+        if(bal===0)zero++;else if(bal>0){nz++;totalAmt+=bal;}
+        cell=`<td class="${bal>0?'ok':'zero'}">${bal!==undefined?'₹'+bal.toLocaleString('en-IN'):'ERR'}</td>`;
+      }
+      const tr=document.createElement('tr');
+      const dupBadge=isDup?` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>` : '';
+      tr.innerHTML=`<td>${done}</td><td>${r.card}${dupBadge}</td>${cell}`;
+      tb.appendChild(tr);
+    });
+    document.getElementById('prog').style.width=(done/total*100)+'%';
+    document.getElementById('cStatus').textContent=`${done}/${total} checked`;
+    document.getElementById('t').textContent=done;
+    document.getElementById('z').textContent=zero;
+    document.getElementById('nz').textContent=nz;
+    document.getElementById('iv').textContent=iv;
+    document.getElementById('totalAmt').textContent='₹'+totalAmt.toLocaleString('en-IN');
+  }
+  document.getElementById('cActions').style.display='flex';
+  toast(`✅ Checked ${total} card(s) · ₹${totalAmt.toLocaleString('en-IN')} total`);
 }
-
-function cRecalculateHeaderCounters() {
-  let zero = 0, nz = 0, iv = 0, totalAmt = 0;
-  
-  Object.values(cResults).forEach(r => {
-    if (r.pending) return;
-    if (r.invalid) { iv++; } 
-    else {
-      if (r.balance === 0) zero++;
-      else if (r.balance > 0) { nz++; totalAmt += r.balance; }
-    }
-  });
-
-  document.getElementById('prog').style.width = (globalSuccessCount / globalTotalUnique * 100) + '%';
-  document.getElementById('t').textContent = globalSuccessCount;
-  document.getElementById('z').textContent = zero;
-  document.getElementById('nz').textContent = nz;
-  document.getElementById('iv').textContent = iv;
-  document.getElementById('totalAmt').textContent = '₹' + totalAmt.toLocaleString('en-IN');
-}
-
 function cDownload(){
   let csv='Sr No,Gift Card No,Balance\n';
-  Object.values(cResults).forEach((r,i)=>csv+=`${i+1},${r.card},${r.invalid?'Invalid Gift Card':(r.balance??'')}\n`);
+  cResults.forEach((r,i)=>csv+=`${i+1},${r.card},${r.invalid?'Invalid Gift Card':(r.balance??'')}\n`);
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='giftcard_balances.csv';a.click();
   toast('CSV downloaded');
 }
-
 function cShareWA(){
-  let txt=`*Croma Gift Card Balances*\n\n`;
-  Object.values(cResults).forEach((r,i)=>txt+=`${i+1}. ${r.card} — ${r.invalid?'Invalid Gift Card':'₹'+(r.balance??'ERR')}\n`);
+  let txt=`*Croma Gift Card Balances* (${cResults.length} cards)\n\n`;
+  cResults.forEach((r,i)=>txt+=`${i+1}. ${r.card} — ${r.invalid?'Invalid Gift Card':'₹'+(r.balance??'ERR')}\n`);
   if(txt.length>4000) txt=txt.slice(0,3900)+'\n...(truncated, use CSV)';
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
-
 function cClear(){
   if(!confirm('Clear all data and start fresh?'))return;
-  cResults={};
-  globalSuccessCount = 0;
-  globalTotalUnique = 0;
+  cResults=[];
   document.getElementById('cards').value='';
   document.getElementById('cTb').innerHTML='';
   document.getElementById('cTbl').style.display='none';

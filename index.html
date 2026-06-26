@@ -125,7 +125,6 @@ td.bad{color:#fca5a5}
 <body>
 <div class="shell">
 
-<!-- ===== HEADER ===== -->
 <div class="head">
   <button class="back" id="backBtn" onclick="showHome()">←</button>
   <div class="logo">🎁</div>
@@ -136,7 +135,6 @@ td.bad{color:#fca5a5}
   </div>
 </div>
 
-<!-- ===== HOME ===== -->
 <div id="home">
   <div class="welcome">
     <div class="big">👋 Welcome To Kartik Tool'S</div>
@@ -158,7 +156,6 @@ td.bad{color:#fca5a5}
   <div class="foot">v3.0 · 🎁 Croma Tools</div>
 </div>
 
-<!-- ===== FORMATTER ===== -->
 <div class="section" id="formatter">
   <div class="card">
     <h2>✨ Format Setter</h2>
@@ -186,17 +183,16 @@ td.bad{color:#fca5a5}
   <div id="debug"></div>
 </div>
 
-<!-- ===== CHECKER ===== -->
 <div class="section" id="checker">
   <div class="card">
     <h2>💰 Balance Checker</h2>
     <div class="sub">Paste card numbers (one per line). Tool will check balance for each.</div>
     <textarea id="cards" placeholder="1001340043075899&#10;1001340040344056&#10;..."></textarea>
     <div class="row">
-      <button class="btn b-primary big" onclick="cRun()">🔍 Check Balance</button>
+      <button class="btn b-primary big" id="checkBtn" onclick="cRun()">🔍 Check Balance</button>
     </div>
     <div class="bar"><div id="prog"></div></div>
-    <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted)"></div>
+    <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted); font-weight: bold;"></div>
     <div id="totalBox" style="display:none;margin-top:14px;padding:16px;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;text-align:center;box-shadow:0 8px 24px rgba(16,185,129,.35)">
       <div style="font-size:12px;opacity:.9;font-weight:600;letter-spacing:.5px;text-transform:uppercase">💰 Total Worth</div>
       <div id="totalAmt" style="font-size:28px;font-weight:900;margin-top:4px">₹0</div>
@@ -345,85 +341,158 @@ const fIp=document.getElementById('fInput');
 fIp.value=localStorage.getItem('croma_last')||'';
 fIp.addEventListener('input',()=>localStorage.setItem('croma_last',fIp.value));
 
-/* ===== CHECKER ===== */
-let cResults=[];
+/* ===== CHECKER WITH AUTO-RETRY RECURSIVE ENGINE ===== */
+let cResults = {}; // Object map using card string as key to handle dynamic multi-round updates
+let dupSetGlobal = new Set();
+
 async function cCheck(card){
   try{
-    const r=await fetch(CHECK_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card})});
-    return await r.json();
-  }catch(e){return {card,error:String(e)};}
-}
-async function cRun(){
-  const raw=document.getElementById('cards').value;
-  const allMatches=raw.match(/\d{16}/g)||[];
-  if(!allMatches.length){toast('No 16-digit numbers found','var(--red)');return;}
-  const seen={};const dupSet=new Set();
-  allMatches.forEach(c=>{seen[c]=(seen[c]||0)+1;if(seen[c]>1)dupSet.add(c);});
-  const cards=[...new Set(allMatches)];
-  const dupCount=dupSet.size;
-  if(dupCount>0){
-    toast(`⚠️ ${dupCount} duplicate card(s) found & skipped`,'var(--amber)');
-  }
-  cResults=[];
-  const tb=document.getElementById('cTb');tb.innerHTML='';
-  document.getElementById('cTbl').style.display='table';
-  document.getElementById('stats').style.display='flex';
-  document.getElementById('totalBox').style.display='block';
-  document.getElementById('cActions').style.display='none';
-  document.getElementById('dup').textContent=dupCount;
-  const total=cards.length;let done=0,zero=0,nz=0,iv=0,totalAmt=0;
-  const batch=100;
-  for(let i=0;i<cards.length;i+=batch){
-    const chunk=cards.slice(i,i+batch);
-    const res=await Promise.all(chunk.map(cCheck));
-    res.forEach(r=>{
-      cResults.push(r);done++;
-      const bal=r.balance;
-      const invalid=(r.status==null && r.expiry==null);
-      const isDup=dupSet.has(r.card);
-      let cell;
-      if(r.error!==undefined){
-        cell=`<td class="bad">ERR</td>`;
-      }else if(invalid){
-        r.invalid=true;iv++;
-        cell=`<td class="bad">Invalid Gift Card</td>`;
-      }else{
-        if(bal===0)zero++;else if(bal>0){nz++;totalAmt+=bal;}
-        cell=`<td class="${bal>0?'ok':'zero'}">${bal!==undefined?'₹'+bal.toLocaleString('en-IN'):'ERR'}</td>`;
-      }
-      const tr=document.createElement('tr');
-      const dupBadge=isDup?` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>`:'';
-      tr.innerHTML=`<td>${done}</td><td>${r.card}${dupBadge}</td>${cell}`;
-      tb.appendChild(tr);
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 12000); // 12-second inner timeout limit
+    const r = await fetch(CHECK_API, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({card}),
+      signal: controller.signal
     });
-    document.getElementById('prog').style.width=(done/total*100)+'%';
-    document.getElementById('cStatus').textContent=`${done}/${total} checked`;
-    document.getElementById('t').textContent=done;
-    document.getElementById('z').textContent=zero;
-    document.getElementById('nz').textContent=nz;
-    document.getElementById('iv').textContent=iv;
-    document.getElementById('totalAmt').textContent='₹'+totalAmt.toLocaleString('en-IN');
+    clearTimeout(id);
+    const data = await r.json();
+    if (!data || data.error || (data.status == null && data.expiry == null && data.balance == null)) {
+      return { card, isError: true }; // Flags for retry engine
+    }
+    return data;
+  }catch(e){
+    return {card, isError: true}; // Network failure/timeout fallback
   }
-  document.getElementById('cActions').style.display='flex';
-  toast(`✅ Checked ${total} card(s) · ₹${totalAmt.toLocaleString('en-IN')} total`);
 }
+
+async function cRun(){
+  const raw = document.getElementById('cards').value;
+  const allMatches = raw.match(/\d{16}/g) || [];
+  if (!allMatches.length) { toast('No 16-digit numbers found', 'var(--red)'); return; }
+  
+  // UI Setup & Buttons Lock
+  document.getElementById('checkBtn').disabled = true;
+  document.getElementById('checkBtn').innerText = "⏳ Running Engine...";
+  
+  const seen = {}; 
+  dupSetGlobal.clear();
+  allMatches.forEach(c => { seen[c] = (seen[c] || 0) + 1; if (seen[c] > 1) dupSetGlobal.add(c); });
+  
+  let targetCards = [...new Set(allMatches)];
+  const dupCount = dupSetGlobal.size;
+  if (dupCount > 0) { toast(`⚠️ ${dupCount} duplicate card(s) skipped`, 'var(--amber)'); }
+  
+  // Initialization of global results mapping
+  cResults = {};
+  targetCards.forEach(c => { cResults[c] = { card: c, balance: undefined, pending: true }; });
+  
+  document.getElementById('cTb').innerHTML = '';
+  document.getElementById('cTbl').style.display = 'table';
+  document.getElementById('stats').style.display = 'flex';
+  document.getElementById('totalBox').style.display = 'block';
+  document.getElementById('cActions').style.display = 'none';
+  document.getElementById('dup').textContent = dupCount;
+  
+  let currentRound = 1;
+  const batchSize = 40; // Smaller safe chunks to scale up to 10k cards safely
+
+  // Infinite processing loop until 0 error items remain
+  while (targetCards.length > 0) {
+    document.getElementById('cStatus').innerHTML = `🔄 Round ${currentRound}: Processing ${targetCards.length} remaining cards...`;
+    let nextRoundQueue = [];
+
+    for (let i = 0; i < targetCards.length; i += batchSize) {
+      const chunk = targetCards.slice(i, i + batchSize);
+      const responses = await Promise.all(chunk.map(cCheck));
+
+      responses.forEach(res => {
+        if (res.isError) {
+          nextRoundQueue.push(res.card); // Re-queue card back into list
+        } else {
+          cResults[res.card] = res; // Lock clean data response
+        }
+      });
+
+      // Live update dashboard UI calculations during processing iterations
+      cRenderLiveStats(allMatches.length - dupCount, nextRoundQueue.length);
+    }
+
+    if (nextRoundQueue.length > 0) {
+      currentRound++;
+      targetCards = nextRoundQueue; // Shift array target pointer to failed list queue
+      await new Promise(r => setTimeout(r, 1000)); // Delay loop cooloff to prevent server load crash
+    } else {
+      targetCards = []; // Escape break block conditions cleanly
+    }
+  }
+
+  document.getElementById('cStatus').textContent = `✅ Successfully completed all allocations across ${currentRound} rounds!`;
+  document.getElementById('checkBtn').disabled = false;
+  document.getElementById('checkBtn').innerText = "🔍 Check Balance";
+  document.getElementById('cActions').style.display = 'flex';
+  toast(`✅ Checked Everything Completely!`);
+}
+
+function cRenderLiveStats(totalUnique, totalErrorsLeft) {
+  const tb = document.getElementById('cTb');
+  tb.innerHTML = ''; // Re-render target table structure rows dynamically
+  
+  let done = 0, zero = 0, nz = 0, iv = 0, totalAmt = 0;
+  
+  Object.values(cResults).forEach((r) => {
+    done++;
+    const bal = r.balance;
+    const invalid = (r.status == null && r.expiry == null && bal == null && !r.pending);
+    const isDup = dupSetGlobal.has(r.card);
+    
+    let cell;
+    if (r.pending && bal === undefined) {
+      cell = `<td style="color:var(--amber); font-weight:bold;">⏳ Retrying Engine...</td>`;
+    } else if (invalid) {
+      r.invalid = true; iv++;
+      cell = `<td class="bad">Invalid Gift Card</td>`;
+    } else {
+      if (bal === 0) zero++; 
+      else if (bal > 0) { nz++; totalAmt += bal; }
+      cell = `<td class="${bal > 0 ? 'ok' : 'zero'}">${bal !== undefined ? '₹' + bal.toLocaleString('en-IN') : 'ERR'}</td>`;
+    }
+    
+    const tr = document.createElement('tr');
+    const dupBadge = isDup ? ` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>` : '';
+    tr.innerHTML = `<td>${done}</td><td>${r.card}${dupBadge}</td>${cell}`;
+    tb.appendChild(tr);
+  });
+
+  // Global elements calculation status sets
+  const processedCount = done - totalErrorsLeft;
+  document.getElementById('prog').style.width = (processedCount / totalUnique * 100) + '%';
+  document.getElementById('t').textContent = done;
+  document.getElementById('z').textContent = zero;
+  document.getElementById('nz').textContent = nz;
+  document.getElementById('iv').textContent = iv;
+  document.getElementById('totalAmt').textContent = '₹' + totalAmt.toLocaleString('en-IN');
+}
+
 function cDownload(){
   let csv='Sr No,Gift Card No,Balance\n';
-  cResults.forEach((r,i)=>csv+=`${i+1},${r.card},${r.invalid?'Invalid Gift Card':(r.balance??'')}\n`);
+  Object.values(cResults).forEach((r,i)=>csv+=`${i+1},${r.card},${r.invalid?'Invalid Gift Card':(r.balance??'')}\n`);
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='giftcard_balances.csv';a.click();
   toast('CSV downloaded');
 }
+
 function cShareWA(){
-  let txt=`*Croma Gift Card Balances* (${cResults.length} cards)\n\n`;
-  cResults.forEach((r,i)=>txt+=`${i+1}. ${r.card} — ${r.invalid?'Invalid Gift Card':'₹'+(r.balance??'ERR')}\n`);
+  let txt=`*Croma Gift Card Balances*\n\n`;
+  Object.values(cResults).forEach((r,i)=>txt+=`${i+1}. ${r.card} — ${r.invalid?'Invalid Gift Card':'₹'+(r.balance??'ERR')}\n`);
   if(txt.length>4000) txt=txt.slice(0,3900)+'\n...(truncated, use CSV)';
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
+
 function cClear(){
   if(!confirm('Clear all data and start fresh?'))return;
-  cResults=[];
+  cResults={};
   document.getElementById('cards').value='';
   document.getElementById('cTb').innerHTML='';
   document.getElementById('cTbl').style.display='none';

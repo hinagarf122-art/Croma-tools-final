@@ -125,6 +125,7 @@ td.bad{color:#fca5a5}
 <body>
 <div class="shell">
 
+<!-- ===== HEADER ===== -->
 <div class="head">
   <button class="back" id="backBtn" onclick="showHome()">←</button>
   <div class="logo">🎁</div>
@@ -135,6 +136,7 @@ td.bad{color:#fca5a5}
   </div>
 </div>
 
+<!-- ===== HOME ===== -->
 <div id="home">
   <div class="welcome">
     <div class="big">👋 Welcome To Kartik Tool'S</div>
@@ -156,6 +158,7 @@ td.bad{color:#fca5a5}
   <div class="foot">v3.0 · 🎁 Croma Tools</div>
 </div>
 
+<!-- ===== FORMATTER ===== -->
 <div class="section" id="formatter">
   <div class="card">
     <h2>✨ Format Setter</h2>
@@ -183,6 +186,7 @@ td.bad{color:#fca5a5}
   <div id="debug"></div>
 </div>
 
+<!-- ===== CHECKER ===== -->
 <div class="section" id="checker">
   <div class="card">
     <h2>💰 Balance Checker</h2>
@@ -341,14 +345,14 @@ const fIp=document.getElementById('fInput');
 fIp.value=localStorage.getItem('croma_last')||'';
 fIp.addEventListener('input',()=>localStorage.setItem('croma_last',fIp.value));
 
-/* ===== CHECKER WITH AUTO-RETRY RECURSIVE ENGINE ===== */
-let cResults = {}; // Object map using card string as key to handle dynamic multi-round updates
+/* ===== CHECKER WITH BLAZING FAST 250 CONCURRENCY ENGINE ===== */
+let cResults = {}; 
 let dupSetGlobal = new Set();
 
 async function cCheck(card){
   try{
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 12000); // 12-second inner timeout limit
+    const id = setTimeout(() => controller.abort(), 9000); // Super aggressive 9s timeout for speed
     const r = await fetch(CHECK_API, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -358,11 +362,11 @@ async function cCheck(card){
     clearTimeout(id);
     const data = await r.json();
     if (!data || data.error || (data.status == null && data.expiry == null && data.balance == null)) {
-      return { card, isError: true }; // Flags for retry engine
+      return { card, isError: true }; 
     }
     return data;
   }catch(e){
-    return {card, isError: true}; // Network failure/timeout fallback
+    return {card, isError: true}; 
   }
 }
 
@@ -371,9 +375,8 @@ async function cRun(){
   const allMatches = raw.match(/\d{16}/g) || [];
   if (!allMatches.length) { toast('No 16-digit numbers found', 'var(--red)'); return; }
   
-  // UI Setup & Buttons Lock
   document.getElementById('checkBtn').disabled = true;
-  document.getElementById('checkBtn').innerText = "⏳ Running Engine...";
+  document.getElementById('checkBtn').innerText = "⚡ Blazing Fast Engine Running...";
   
   const seen = {}; 
   dupSetGlobal.clear();
@@ -383,7 +386,6 @@ async function cRun(){
   const dupCount = dupSetGlobal.size;
   if (dupCount > 0) { toast(`⚠️ ${dupCount} duplicate card(s) skipped`, 'var(--amber)'); }
   
-  // Initialization of global results mapping
   cResults = {};
   targetCards.forEach(c => { cResults[c] = { card: c, balance: undefined, pending: true }; });
   
@@ -395,11 +397,10 @@ async function cRun(){
   document.getElementById('dup').textContent = dupCount;
   
   let currentRound = 1;
-  const batchSize = 40; // Smaller safe chunks to scale up to 10k cards safely
+  const batchSize = 250; // Optimized Concurrency for Maximum Speed without crashing
 
-  // Infinite processing loop until 0 error items remain
   while (targetCards.length > 0) {
-    document.getElementById('cStatus').innerHTML = `🔄 Round ${currentRound}: Processing ${targetCards.length} remaining cards...`;
+    document.getElementById('cStatus').innerHTML = `🚀 Round ${currentRound}: Processing ${targetCards.length} cards at 250x Speed...`;
     let nextRoundQueue = [];
 
     for (let i = 0; i < targetCards.length; i += batchSize) {
@@ -408,35 +409,34 @@ async function cRun(){
 
       responses.forEach(res => {
         if (res.isError) {
-          nextRoundQueue.push(res.card); // Re-queue card back into list
+          nextRoundQueue.push(res.card); 
         } else {
-          cResults[res.card] = res; // Lock clean data response
+          cResults[res.card] = res; 
         }
       });
 
-      // Live update dashboard UI calculations during processing iterations
       cRenderLiveStats(allMatches.length - dupCount, nextRoundQueue.length);
     }
 
     if (nextRoundQueue.length > 0) {
       currentRound++;
-      targetCards = nextRoundQueue; // Shift array target pointer to failed list queue
-      await new Promise(r => setTimeout(r, 1000)); // Delay loop cooloff to prevent server load crash
+      targetCards = nextRoundQueue; 
+      // Zero delay cooloff for non-stop looping execution
     } else {
-      targetCards = []; // Escape break block conditions cleanly
+      targetCards = []; 
     }
   }
 
-  document.getElementById('cStatus').textContent = `✅ Successfully completed all allocations across ${currentRound} rounds!`;
+  document.getElementById('cStatus').textContent = `✅ Completed perfectly across ${currentRound} optimized speed rounds!`;
   document.getElementById('checkBtn').disabled = false;
   document.getElementById('checkBtn').innerText = "🔍 Check Balance";
   document.getElementById('cActions').style.display = 'flex';
-  toast(`✅ Checked Everything Completely!`);
+  toast(`✅ Finished All Tasks!`);
 }
 
 function cRenderLiveStats(totalUnique, totalErrorsLeft) {
   const tb = document.getElementById('cTb');
-  tb.innerHTML = ''; // Re-render target table structure rows dynamically
+  tb.innerHTML = ''; 
   
   let done = 0, zero = 0, nz = 0, iv = 0, totalAmt = 0;
   
@@ -448,7 +448,7 @@ function cRenderLiveStats(totalUnique, totalErrorsLeft) {
     
     let cell;
     if (r.pending && bal === undefined) {
-      cell = `<td style="color:var(--amber); font-weight:bold;">⏳ Retrying Engine...</td>`;
+      cell = `<td style="color:var(--amber); font-weight:bold;">⚡ Retrying in next batch...</td>`;
     } else if (invalid) {
       r.invalid = true; iv++;
       cell = `<td class="bad">Invalid Gift Card</td>`;
@@ -464,7 +464,6 @@ function cRenderLiveStats(totalUnique, totalErrorsLeft) {
     tb.appendChild(tr);
   });
 
-  // Global elements calculation status sets
   const processedCount = done - totalErrorsLeft;
   document.getElementById('prog').style.width = (processedCount / totalUnique * 100) + '%';
   document.getElementById('t').textContent = done;

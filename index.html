@@ -199,11 +199,7 @@ td.err400{color:#fb923c;font-weight:700}
     <div class="row" id="cMainButtons">
       <button class="btn b-primary big" id="checkBtn" onclick="cRun()">🔍 Check Balance</button>
     </div>
-    <!-- Retry buttons row - shown after check -->
-    <div class="row" id="retryRow" style="display:none">
-      <button class="btn b-orange" id="retry400Btn" style="display:none" onclick="cRetry400Auto()">⚡ Retry 400 Errors</button>
-      <button class="btn b-amber" id="retryErrBtn" style="display:none" onclick="cRetryErrors()">🔄 Retry Other Errors</button>
-    </div>
+
     <div class="bar"><div id="prog"></div></div>
     <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted)"></div>
     <div id="totalBox" style="display:none;margin-top:14px;padding:16px;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;text-align:center;box-shadow:0 8px 24px rgba(16,185,129,.35)">
@@ -360,7 +356,6 @@ let cResults = [];
 let dupSet = new Set();
 let isRunning = false;
 
-/* Single card fetch — returns tagged result */
 async function cCheck(card){
   try{
     const r = await fetch(CHECK_API,{
@@ -368,51 +363,52 @@ async function cCheck(card){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({card})
     });
-    if(r.status === 400){
-      return {card, err400: true, error:'HTTP 400'};
-    }
     const data = await r.json();
-    return data;
+    // agar balance/status dono null hai aur koi error field bhi nahi to invalid gift card
+    if(data && (data.balance !== undefined || data.status !== undefined || data.expiry !== undefined)){
+      return data;
+    }
+    // unexpected shape — treat as error, retry karega
+    return {card, _retry: true};
   }catch(e){
-    return {card, error: String(e)};
+    return {card, _retry: true};
   }
 }
 
-/* Controlled concurrency runner — runs maxConcurrent fetches at a time */
 async function runWithConcurrency(cards, maxConcurrent, onResult){
-  const results = new Array(cards.length);
   let nextIdx = 0;
   async function worker(){
     while(nextIdx < cards.length){
       const idx = nextIdx++;
       const res = await cCheck(cards[idx]);
-      results[idx] = res;
       onResult(res, idx);
     }
   }
   const workers = [];
   for(let i = 0; i < Math.min(maxConcurrent, cards.length); i++) workers.push(worker());
   await Promise.all(workers);
-  return results;
 }
 
-/* Rebuild the full table from cResults */
+function isResolved(r){
+  // Card resolved hai agar: balance/expiry/status koi bhi field hai AND _retry nahi
+  if(r._retry) return false;
+  if(r.error !== undefined) return false;
+  return true;
+}
+
 function renderTable(){
   const tb = document.getElementById('cTb');
   tb.innerHTML = '';
-  let zero=0, nz=0, iv=0, totalAmt=0, err400=0, errOther=0;
+  let zero=0, nz=0, iv=0, totalAmt=0, pending=0;
 
   cResults.forEach((r, idx)=>{
     const isDup = dupSet.has(r.card);
-    const invalid = (r.status == null && r.expiry == null && !r.error && !r.err400);
+    const invalid = isResolved(r) && (r.status == null && r.expiry == null && r.balance == null);
     let cell;
 
-    if(r.err400){
-      cell = `<td class="err400">⚡ 400 Error</td>`;
-      err400++;
-    } else if(r.error !== undefined){
-      cell = `<td class="bad">ERR</td>`;
-      errOther++;
+    if(!isResolved(r)){
+      cell = `<td class="bad pulse">🔄 Retrying…</td>`;
+      pending++;
     } else if(invalid){
       r.invalid = true; iv++;
       cell = `<td class="bad">Invalid Gift Card</td>`;
@@ -434,34 +430,7 @@ function renderTable(){
   document.getElementById('iv').textContent = iv;
   document.getElementById('totalAmt').textContent = '₹'+totalAmt.toLocaleString('en-IN');
 
-  /* Show/hide retry buttons */
-  const retry400Btn = document.getElementById('retry400Btn');
-  const retryErrBtn = document.getElementById('retryErrBtn');
-  const retryRow = document.getElementById('retryRow');
-
-  if(err400 > 0){
-    retry400Btn.style.display = 'block';
-    retry400Btn.textContent = `⚡ Retry ${err400} × 400 Errors`;
-  } else {
-    retry400Btn.style.display = 'none';
-  }
-
-  if(errOther > 0){
-    retryErrBtn.style.display = 'block';
-    retryErrBtn.textContent = `🔄 Retry ${errOther} Errors`;
-  } else {
-    retryErrBtn.style.display = 'none';
-  }
-
-  retryRow.style.display = (err400 > 0 || errOther > 0) ? 'flex' : 'none';
-
-  return {err400, errOther, totalAmt, zero, nz, iv};
-}
-
-function setButtonsLocked(locked){
-  document.getElementById('checkBtn').disabled = locked;
-  document.getElementById('retry400Btn').disabled = locked;
-  document.getElementById('retryErrBtn').disabled = locked;
+  return {zero, nz, iv, totalAmt, pending};
 }
 
 async function cRun(){
@@ -474,93 +443,56 @@ async function cRun(){
   allMatches.forEach(c=>{ seen[c]=(seen[c]||0)+1; if(seen[c]>1) dupSet.add(c); });
   const unique = [...new Set(allMatches)];
   const dupCount = dupSet.size;
-  if(dupCount > 0) toast(`⚠️ ${dupCount} duplicate card(s) found & skipped`,'var(--amber)');
+  if(dupCount > 0) toast(`⚠️ ${dupCount} duplicate card(s) skipped`,'var(--amber)');
 
-  cResults = unique.map(card=>({card, _pending:true}));
+  // Initialize sab cards as pending
+  cResults = unique.map(card=>({card, _retry:true}));
 
   document.getElementById('cTbl').style.display = 'table';
   document.getElementById('stats').style.display = 'flex';
   document.getElementById('totalBox').style.display = 'block';
   document.getElementById('cActions').style.display = 'none';
-  document.getElementById('retryRow').style.display = 'none';
   document.getElementById('dup').textContent = dupCount;
 
-  await runBatch(unique, `Checking`);
-}
-
-async function runBatch(targetCards, label){
   isRunning = true;
-  setButtonsLocked(true);
-  const total = targetCards.length;
-  let done = 0;
+  document.getElementById('checkBtn').disabled = true;
 
-  document.getElementById('prog').style.width = '0%';
-
-  await runWithConcurrency(targetCards, CONCURRENCY, (res)=>{
-    /* Update cResults in-place */
-    const idx = cResults.findIndex(r => r.card === res.card);
-    if(idx !== -1) cResults[idx] = res; else cResults.push(res);
-
-    done++;
-    document.getElementById('prog').style.width = (done/total*100)+'%';
-    document.getElementById('cStatus').textContent = `${label}: ${done}/${total}`;
-
-    /* Incremental table refresh every 50 results or at end */
-    if(done % 50 === 0 || done === total) renderTable();
-  });
-
-  const {err400, errOther, totalAmt} = renderTable();
-  isRunning = false;
-  setButtonsLocked(false);
-  document.getElementById('cActions').style.display = 'flex';
-
-  if(err400 > 0 || errOther > 0){
-    const msg = err400 > 0
-      ? `⚠️ ${err400} × HTTP 400 errors — tap ⚡ Retry to auto-fix`
-      : `⚠️ ${errOther} errors — tap 🔄 Retry`;
-    toast(msg, 'var(--amber)');
-    document.getElementById('cStatus').textContent = `Done. ${err400} × 400 errors, ${errOther} other errors remaining.`;
-  } else {
-    toast(`✅ All ${cResults.length} cards checked · ₹${totalAmt.toLocaleString('en-IN')} total`);
-    document.getElementById('cStatus').textContent = `✅ Completed — ₹${totalAmt.toLocaleString('en-IN')} total`;
-  }
-}
-
-/* Auto-retry 400 errors in a loop until all cleared or max 10 rounds */
-async function cRetry400Auto(){
-  if(isRunning) return;
+  const CONCURRENCY = 200;
   let round = 0;
-  const MAX_ROUNDS = 20;
 
-  while(round < MAX_ROUNDS){
-    const errorCards = cResults.filter(r => r.err400).map(r => r.card);
-    if(errorCards.length === 0){
-      toast('✅ All 400 errors resolved!', 'var(--green)');
-      document.getElementById('retryRow').style.display = 'none';
-      return;
-    }
+  // Loop: jab tak koi bhi unresolved card bacha hai, retry karta raho
+  while(true){
     round++;
-    document.getElementById('retry400Btn').textContent = `⚡ Retrying ${errorCards.length} × 400 (Round ${round})…`;
-    document.getElementById('cStatus').textContent = `🔄 Auto-retrying 400 errors — round ${round}/${MAX_ROUNDS}…`;
-    await runBatch(errorCards, `Retry400 R${round}`);
+    const targets = cResults.filter(r => !isResolved(r)).map(r => r.card);
+    if(targets.length === 0) break;
 
-    /* Small pause between rounds to avoid hammering */
-    await new Promise(res => setTimeout(res, 300));
+    let done = 0;
+    const total = targets.length;
+    document.getElementById('prog').style.width = '0%';
+
+    const label = round === 1 ? 'Checking' : `Retrying (Round ${round})`;
+    document.getElementById('cStatus').textContent = `${label}: 0/${total}…`;
+
+    await runWithConcurrency(targets, CONCURRENCY, (res)=>{
+      const idx = cResults.findIndex(r => r.card === res.card);
+      if(idx !== -1) cResults[idx] = res;
+      done++;
+      document.getElementById('prog').style.width = (done/total*100)+'%';
+      document.getElementById('cStatus').textContent = `${label}: ${done}/${total}`;
+      if(done % 50 === 0 || done === total) renderTable();
+    });
+
+    // Short pause between rounds
+    await new Promise(res => setTimeout(res, 200));
   }
 
-  const remaining = cResults.filter(r => r.err400).length;
-  if(remaining > 0){
-    toast(`⚠️ ${remaining} × 400 errors still remain after ${MAX_ROUNDS} rounds`, 'var(--amber)');
-  }
-}
-
-/* Retry non-400 general errors once */
-async function cRetryErrors(){
-  if(isRunning) return;
-  const errorCards = cResults.filter(r => r.error !== undefined && !r.err400).map(r => r.card);
-  if(!errorCards.length){ toast('No general errors to retry','var(--blue)'); return; }
-  document.getElementById('cStatus').textContent = `🔄 Retrying ${errorCards.length} error cards…`;
-  await runBatch(errorCards, 'RetryErr');
+  const {totalAmt} = renderTable();
+  isRunning = false;
+  document.getElementById('checkBtn').disabled = false;
+  document.getElementById('cActions').style.display = 'flex';
+  document.getElementById('prog').style.width = '100%';
+  document.getElementById('cStatus').textContent = `✅ All ${cResults.length} cards done · ₹${totalAmt.toLocaleString('en-IN')} total`;
+  toast(`✅ ${cResults.length} cards checked · ₹${totalAmt.toLocaleString('en-IN')} total`);
 }
 
 function cDownload(){
@@ -589,7 +521,7 @@ function cClear(){
   document.getElementById('stats').style.display='none';
   document.getElementById('totalBox').style.display='none';
   document.getElementById('cActions').style.display='none';
-  document.getElementById('retryRow').style.display='none';
+  
   document.getElementById('prog').style.width='0';
   document.getElementById('cStatus').textContent='';
   document.getElementById('t').textContent='0';

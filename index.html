@@ -42,49 +42,29 @@ body{
   font-size:15px;
 }
 .shell{max-width:560px;margin:0 auto;padding:18px;}
-
-/* ===== HEADER ===== */
 .head{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-top:8px}
-.logo{
-  width:48px;height:48px;border-radius:14px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex;align-items:center;justify-content:center;font-size:26px;
-  box-shadow:0 8px 24px rgba(168,85,247,.4);
-}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 24px rgba(168,85,247,.4);}
 .head h1{font-size:22px;font-weight:800;background:linear-gradient(90deg,#fff,#e9d5ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .head .tag{font-size:12px;color:var(--muted);margin-top:2px}
 .back{display:none;align-items:center;gap:6px;background:var(--card);color:var(--text);padding:8px 14px;border-radius:10px;border:1px solid var(--border);font-size:14px;font-weight:600;cursor:pointer;margin-right:auto}
 .back.show{display:inline-flex}
-
-/* ===== HOME TILES ===== */
 #home{display:block}
 .welcome{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;text-align:center}
 .welcome .big{font-size:18px;font-weight:700;margin-bottom:4px}
 .welcome .small{font-size:12px;color:var(--muted)}
-.tile{
-  display:block;width:100%;padding:22px 18px;margin:12px 0;border-radius:18px;border:0;
-  font-size:17px;font-weight:700;text-align:left;cursor:pointer;
-  box-shadow:0 8px 28px rgba(0,0,0,.4);
-  position:relative;overflow:hidden;color:#fff;
-}
+.tile{display:block;width:100%;padding:22px 18px;margin:12px 0;border-radius:18px;border:0;font-size:17px;font-weight:700;text-align:left;cursor:pointer;box-shadow:0 8px 28px rgba(0,0,0,.4);position:relative;overflow:hidden;color:#fff;}
 .tile::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:34px;opacity:.6}
 .tile .emoji{font-size:36px;display:block;margin-bottom:8px}
 .tile .desc{font-size:12px;font-weight:500;opacity:.9;display:block;margin-top:6px;line-height:1.4}
 .tile-1{background:linear-gradient(135deg,#10b981,#059669)}
 .tile-2{background:linear-gradient(135deg,#a855f7,#ec4899)}
 .tile:active{transform:scale(.98)}
-
-/* ===== SECTIONS ===== */
 .section{display:none}
 .section.active{display:block}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
 .section h2{font-size:18px;color:#fff;margin-bottom:6px}
 .sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.4}
-textarea{
-  width:100%;min-height:150px;padding:12px;border-radius:12px;
-  border:1px solid var(--border);background:var(--bg-soft);color:var(--text);
-  font-size:15px;font-family:ui-monospace,monospace;resize:vertical;
-}
+textarea{width:100%;min-height:150px;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg-soft);color:var(--text);font-size:15px;font-family:ui-monospace,monospace;resize:vertical;}
 textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(168,85,247,.2)}
 .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 button.btn{flex:1;min-width:120px;padding:13px 10px;border:0;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;transition:transform .1s}
@@ -98,8 +78,6 @@ button.btn:active{transform:scale(.96)}
 .b-red{background:var(--red);color:#fff}
 .b-purple{background:#7c3aed;color:#fff}
 .b-wa{background:#25d366;color:#fff}
-
-/* ===== TABLE ===== */
 table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
 th,td{border-bottom:1px solid var(--border);padding:9px 6px;text-align:left;font-family:ui-monospace,monospace;word-break:break-all}
 th{background:var(--bg-soft);color:var(--accent);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
@@ -107,8 +85,6 @@ td{background:transparent}
 tr:hover td{background:var(--card-hi)}
 td.bad{color:#fca5a5}
 .zero{color:#f87171;font-weight:700}.ok{color:#4ade80;font-weight:700}
-
-/* ===== MISC ===== */
 .count{font-size:13px;color:var(--muted);margin-top:10px;font-weight:600}
 .hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;opacity:.8}
 #debug{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:10px;font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;display:none;color:#fbbf24;max-height:300px;overflow:auto}
@@ -120,6 +96,9 @@ td.bad{color:#fca5a5}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .toast.show{opacity:1}
 .foot{text-align:center;font-size:11px;color:var(--muted);opacity:.6;padding:24px 0 12px}
+/* Retry badge */
+.retry-badge{background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800;margin-left:4px}
+.retry-info{background:linear-gradient(135deg,#f59e0b22,#f59e0b11);border:1px solid #f59e0b44;border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:#fcd34d;display:none}
 </style>
 </head>
 <body>
@@ -140,20 +119,17 @@ td.bad{color:#fca5a5}
     <div class="big">👋 Welcome To Kartik Tool'S</div>
     <div class="small">Choose a tool to get started</div>
   </div>
-
   <button class="tile tile-1" onclick="show('formatter')">
     <span class="emoji">✨</span>
     Format Setter
     <span class="desc">Paste messy SMS/emails — get clean Card numbers + PINs ready for Google Sheets</span>
   </button>
-
   <button class="tile tile-2" onclick="show('checker')">
     <span class="emoji">💰</span>
     Balance Checker
-    <span class="desc">Bulk check balance for all your gift cards in one go. Export CSV or share on WhatsApp.</span>
+    <span class="desc">Bulk check balance for all your gift cards in one go. Auto-retry on errors. Export CSV or share on WhatsApp.</span>
   </button>
-
-  <div class="foot">v3.0 · 🎁 Croma Tools</div>
+  <div class="foot">v3.1 · 🎁 Croma Tools · Auto-Retry Edition</div>
 </div>
 
 <div class="section" id="formatter">
@@ -186,13 +162,14 @@ td.bad{color:#fca5a5}
 <div class="section" id="checker">
   <div class="card">
     <h2>💰 Balance Checker</h2>
-    <div class="sub">Paste card numbers (one per line). Tool will check balance for each.</div>
+    <div class="sub">Paste card numbers (one per line). ERR wale cards automatic retry honge — max 3 baar.</div>
     <textarea id="cards" placeholder="1001340043075899&#10;1001340040344056&#10;..."></textarea>
     <div class="row">
       <button class="btn b-primary big" id="checkBtn" onclick="cRun()">🔍 Check Balance</button>
     </div>
     <div class="bar"><div id="prog"></div></div>
-    <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted); font-weight: bold;"></div>
+    <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted)"></div>
+    <div class="retry-info" id="retryInfo"></div>
     <div id="totalBox" style="display:none;margin-top:14px;padding:16px;border-radius:14px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;text-align:center;box-shadow:0 8px 24px rgba(16,185,129,.35)">
       <div style="font-size:12px;opacity:.9;font-weight:600;letter-spacing:.5px;text-transform:uppercase">💰 Total Worth</div>
       <div id="totalAmt" style="font-size:28px;font-weight:900;margin-top:4px">₹0</div>
@@ -211,7 +188,7 @@ td.bad{color:#fca5a5}
     </div>
   </div>
   <table id="cTbl" style="display:none">
-    <thead><tr><th>#</th><th>Card</th><th>Balance</th></tr></thead>
+    <thead><tr><th>#</th><th>Card</th><th>Balance</th><th>Try</th></tr></thead>
     <tbody id="cTb"></tbody>
   </table>
 </div>
@@ -221,8 +198,10 @@ td.bad{color:#fca5a5}
 
 <script>
 const CHECK_API = "https://croma-app-1-31gtbzrnb-otherwise390-2311s-projects.vercel.app/api/check";
+const MAX_RETRIES = 20;
+const BATCH_SIZE = 50;
+const RETRY_DELAY_MS = 100;
 
-/* ===== Navigation ===== */
 function show(id){
   document.getElementById('home').style.display='none';
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -245,13 +224,12 @@ window.addEventListener('popstate',()=>{
 const initHash=location.hash.slice(1);
 if(initHash==='formatter'||initHash==='checker') show(initHash); else showHome();
 
-/* ===== Toast ===== */
 function toast(msg,color){
   const t=document.getElementById('toast');
   t.textContent=msg; t.style.background=color||'var(--green)';
   t.classList.add('show');
   clearTimeout(window._tt);
-  window._tt=setTimeout(()=>t.classList.remove('show'),2000);
+  window._tt=setTimeout(()=>t.classList.remove('show'),2500);
 }
 function doCopy(text,msg){
   if(navigator.clipboard&&window.isSecureContext){
@@ -341,142 +319,189 @@ const fIp=document.getElementById('fInput');
 fIp.value=localStorage.getItem('croma_last')||'';
 fIp.addEventListener('input',()=>localStorage.setItem('croma_last',fIp.value));
 
-/* ===== CHECKER WITH AUTO-RETRY RECURSIVE ENGINE ===== */
-let cResults = {}; // Object map using card string as key to handle dynamic multi-round updates
-let dupSetGlobal = new Set();
+/* ===== CHECKER WITH AUTO-RETRY ===== */
+let cResults=[];
+let isRunning=false;
 
-async function cCheck(card){
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+async function cCheckOne(card){
   try{
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 12000); // 12-second inner timeout limit
-    const r = await fetch(CHECK_API, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({card}),
-      signal: controller.signal
+    const r=await fetch(CHECK_API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({card}),
+      signal:AbortSignal.timeout(15000)
     });
-    clearTimeout(id);
-    const data = await r.json();
-    if (!data || data.error || (data.status == null && data.expiry == null && data.balance == null)) {
-      return { card, isError: true }; // Flags for retry engine
-    }
-    return data;
-  }catch(e){
-    return {card, isError: true}; // Network failure/timeout fallback
+    if(!r.ok) return {card,error:`HTTP ${r.status}`};
+    return await r.json();
+  }catch(e){return {card,error:String(e)};}
+}
+
+async function checkBatch(cards){
+  const results=[];
+  for(let i=0;i<cards.length;i+=BATCH_SIZE){
+    const chunk=cards.slice(i,i+BATCH_SIZE);
+    const res=await Promise.all(chunk.map(cCheckOne));
+    results.push(...res);
+    if(i+BATCH_SIZE<cards.length) await sleep(200);
   }
+  return results;
+}
+
+function updateStats(results,dupSet){
+  let zero=0,nz=0,iv=0,totalAmt=0,errCount=0;
+  results.forEach(r=>{
+    if(r.error!==undefined){errCount++;}
+    else if(r.status==null&&r.expiry==null){iv++;}
+    else{
+      if(r.balance===0)zero++;
+      else if(r.balance>0){nz++;totalAmt+=r.balance;}
+    }
+  });
+  document.getElementById('t').textContent=results.length;
+  document.getElementById('z').textContent=zero;
+  document.getElementById('nz').textContent=nz;
+  document.getElementById('iv').textContent=iv;
+  document.getElementById('dup').textContent=dupSet?dupSet.size:0;
+  document.getElementById('totalAmt').textContent='₹'+totalAmt.toLocaleString('en-IN');
+  return{zero,nz,iv,errCount,totalAmt};
+}
+
+function renderTable(results,dupSet,retryMap){
+  const tb=document.getElementById('cTb');
+  tb.innerHTML='';
+  results.forEach((r,i)=>{
+    const isDup=dupSet&&dupSet.has(r.card);
+    const tries=(retryMap&&retryMap[r.card])||1;
+    const tr=document.createElement('tr');
+    let cell;
+    if(r.error!==undefined){
+      cell=`<td class="bad">ERR</td>`;
+    }else if(r.status==null&&r.expiry==null){
+      cell=`<td class="bad">Invalid Gift Card</td>`;
+    }else{
+      cell=`<td class="${r.balance>0?'ok':'zero'}">${r.balance!==undefined?'₹'+r.balance.toLocaleString('en-IN'):'ERR'}</td>`;
+    }
+    const dupBadge=isDup?` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>`:'';
+    const retryBadge=tries>1?`<span class="retry-badge">R${tries-1}</span>`:'';
+    tr.innerHTML=`<td>${i+1}</td><td>${r.card}${dupBadge}</td>${cell}<td style="font-size:11px;color:var(--muted)">${tries>1?'×'+tries:'—'}${retryBadge}</td>`;
+    tb.appendChild(tr);
+  });
 }
 
 async function cRun(){
-  const raw = document.getElementById('cards').value;
-  const allMatches = raw.match(/\d{16}/g) || [];
-  if (!allMatches.length) { toast('No 16-digit numbers found', 'var(--red)'); return; }
-  
-  // UI Setup & Buttons Lock
-  document.getElementById('checkBtn').disabled = true;
-  document.getElementById('checkBtn').innerText = "⏳ Running Engine...";
-  
-  const seen = {}; 
-  dupSetGlobal.clear();
-  allMatches.forEach(c => { seen[c] = (seen[c] || 0) + 1; if (seen[c] > 1) dupSetGlobal.add(c); });
-  
-  let targetCards = [...new Set(allMatches)];
-  const dupCount = dupSetGlobal.size;
-  if (dupCount > 0) { toast(`⚠️ ${dupCount} duplicate card(s) skipped`, 'var(--amber)'); }
-  
-  // Initialization of global results mapping
-  cResults = {};
-  targetCards.forEach(c => { cResults[c] = { card: c, balance: undefined, pending: true }; });
-  
-  document.getElementById('cTb').innerHTML = '';
-  document.getElementById('cTbl').style.display = 'table';
-  document.getElementById('stats').style.display = 'flex';
-  document.getElementById('totalBox').style.display = 'block';
-  document.getElementById('cActions').style.display = 'none';
-  document.getElementById('dup').textContent = dupCount;
-  
-  let currentRound = 1;
-  const batchSize = 40; // Smaller safe chunks to scale up to 10k cards safely
+  if(isRunning){toast('Already running…','var(--amber)');return;}
+  const raw=document.getElementById('cards').value;
+  const allMatches=raw.match(/\d{16}/g)||[];
+  if(!allMatches.length){toast('No 16-digit numbers found','var(--red)');return;}
 
-  // Infinite processing loop until 0 error items remain
-  while (targetCards.length > 0) {
-    document.getElementById('cStatus').innerHTML = `🔄 Round ${currentRound}: Processing ${targetCards.length} remaining cards...`;
-    let nextRoundQueue = [];
+  const seen={};const dupSet=new Set();
+  allMatches.forEach(c=>{seen[c]=(seen[c]||0)+1;if(seen[c]>1)dupSet.add(c);});
+  const cards=[...new Set(allMatches)];
 
-    for (let i = 0; i < targetCards.length; i += batchSize) {
-      const chunk = targetCards.slice(i, i + batchSize);
-      const responses = await Promise.all(chunk.map(cCheck));
+  if(dupSet.size>0) toast(`⚠️ ${dupSet.size} duplicate(s) skipped`,'var(--amber)');
 
-      responses.forEach(res => {
-        if (res.isError) {
-          nextRoundQueue.push(res.card); // Re-queue card back into list
-        } else {
-          cResults[res.card] = res; // Lock clean data response
-        }
+  isRunning=true;
+  document.getElementById('checkBtn').textContent='⏳ Checking…';
+  document.getElementById('checkBtn').disabled=true;
+
+  document.getElementById('cTbl').style.display='table';
+  document.getElementById('stats').style.display='flex';
+  document.getElementById('totalBox').style.display='block';
+  document.getElementById('cActions').style.display='none';
+  document.getElementById('retryInfo').style.display='none';
+  document.getElementById('prog').style.width='0';
+
+  const retryMap={};
+  cards.forEach(c=>retryMap[c]=0);
+
+  let resultMap={};
+  let pendingCards=[...cards];
+  let totalDone=0;
+
+  for(let attempt=1;attempt<=MAX_RETRIES+1;attempt++){
+    if(pendingCards.length===0) break;
+
+    if(attempt>1){
+      const retryInfo=document.getElementById('retryInfo');
+      retryInfo.style.display='block';
+      retryInfo.textContent=`🔄 Retry ${attempt-1}/${MAX_RETRIES}: ${pendingCards.length} ERR cards dobara check ho rahe hain…`;
+      toast(`🔄 Retry ${attempt-1}: ${pendingCards.length} cards`,'var(--amber)');
+      await sleep(RETRY_DELAY_MS);
+    }
+
+    const isFirstRun=(attempt===1);
+    const batchTotal=pendingCards.length;
+    let batchDone=0;
+
+    const newResults=[];
+    for(let i=0;i<pendingCards.length;i+=BATCH_SIZE){
+      const chunk=pendingCards.slice(i,i+BATCH_SIZE);
+      const res=await Promise.all(chunk.map(cCheckOne));
+      res.forEach(r=>{
+        retryMap[r.card]=(retryMap[r.card]||0)+1;
+        resultMap[r.card]=r;
+        newResults.push(r);
       });
+      batchDone+=chunk.length;
+      if(isFirstRun) totalDone+=chunk.length;
 
-      // Live update dashboard UI calculations during processing iterations
-      cRenderLiveStats(allMatches.length - dupCount, nextRoundQueue.length);
+      const overallPct=isFirstRun
+        ?(totalDone/cards.length*100)
+        :(Object.keys(resultMap).length/cards.length*100);
+      document.getElementById('prog').style.width=overallPct+'%';
+
+      const successSoFar=Object.values(resultMap).filter(r=>r.error===undefined).length;
+      const errSoFar=Object.values(resultMap).filter(r=>r.error!==undefined).length;
+      document.getElementById('cStatus').textContent=
+        attempt===1
+          ?`Pass 1: ${totalDone}/${cards.length} checked — ${errSoFar} ERR`
+          :`Retry ${attempt-1}: ${batchDone}/${batchTotal} — ${errSoFar} still ERR`;
+
+      const allResults=Object.values(resultMap);
+      updateStats(allResults,dupSet);
+      renderTable(allResults,dupSet,retryMap);
     }
 
-    if (nextRoundQueue.length > 0) {
-      currentRound++;
-      targetCards = nextRoundQueue; // Shift array target pointer to failed list queue
-      await new Promise(r => setTimeout(r, 1000)); // Delay loop cooloff to prevent server load crash
-    } else {
-      targetCards = []; // Escape break block conditions cleanly
-    }
+    pendingCards=Object.values(resultMap).filter(r=>r.error!==undefined).map(r=>r.card);
   }
 
-  document.getElementById('cStatus').textContent = `✅ Successfully completed all allocations across ${currentRound} rounds!`;
-  document.getElementById('checkBtn').disabled = false;
-  document.getElementById('checkBtn').innerText = "🔍 Check Balance";
-  document.getElementById('cActions').style.display = 'flex';
-  toast(`✅ Checked Everything Completely!`);
-}
+  const finalResults=Object.values(resultMap);
+  const {errCount,totalAmt}=updateStats(finalResults,dupSet);
+  renderTable(finalResults,dupSet,retryMap);
+  cResults=[...finalResults];
+  cResults.invalid=false;
+  finalResults.forEach(r=>{if(r.status==null&&r.expiry==null&&r.error===undefined)r.invalid=true;});
 
-function cRenderLiveStats(totalUnique, totalErrorsLeft) {
-  const tb = document.getElementById('cTb');
-  tb.innerHTML = ''; // Re-render target table structure rows dynamically
-  
-  let done = 0, zero = 0, nz = 0, iv = 0, totalAmt = 0;
-  
-  Object.values(cResults).forEach((r) => {
-    done++;
-    const bal = r.balance;
-    const invalid = (r.status == null && r.expiry == null && bal == null && !r.pending);
-    const isDup = dupSetGlobal.has(r.card);
-    
-    let cell;
-    if (r.pending && bal === undefined) {
-      cell = `<td style="color:var(--amber); font-weight:bold;">⏳ Retrying Engine...</td>`;
-    } else if (invalid) {
-      r.invalid = true; iv++;
-      cell = `<td class="bad">Invalid Gift Card</td>`;
-    } else {
-      if (bal === 0) zero++; 
-      else if (bal > 0) { nz++; totalAmt += bal; }
-      cell = `<td class="${bal > 0 ? 'ok' : 'zero'}">${bal !== undefined ? '₹' + bal.toLocaleString('en-IN') : 'ERR'}</td>`;
-    }
-    
-    const tr = document.createElement('tr');
-    const dupBadge = isDup ? ` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>` : '';
-    tr.innerHTML = `<td>${done}</td><td>${r.card}${dupBadge}</td>${cell}`;
-    tb.appendChild(tr);
-  });
+  document.getElementById('prog').style.width='100%';
+  document.getElementById('cActions').style.display='flex';
 
-  // Global elements calculation status sets
-  const processedCount = done - totalErrorsLeft;
-  document.getElementById('prog').style.width = (processedCount / totalUnique * 100) + '%';
-  document.getElementById('t').textContent = done;
-  document.getElementById('z').textContent = zero;
-  document.getElementById('nz').textContent = nz;
-  document.getElementById('iv').textContent = iv;
-  document.getElementById('totalAmt').textContent = '₹' + totalAmt.toLocaleString('en-IN');
+  const retryInfo=document.getElementById('retryInfo');
+  if(errCount>0){
+    retryInfo.style.display='block';
+    retryInfo.textContent=`⚠️ ${errCount} card(s) still ERR after ${MAX_RETRIES} retries — server issue ho sakta hai. CSV me ERR likha jayega.`;
+  } else {
+    retryInfo.style.display='block';
+    retryInfo.style.background='linear-gradient(135deg,#10b98122,#10b98111)';
+    retryInfo.style.borderColor='#10b98144';
+    retryInfo.style.color='#6ee7b7';
+    retryInfo.textContent=`✅ Sab cards successfully check ho gaye! Zero ERR.`;
+  }
+
+  isRunning=false;
+  document.getElementById('checkBtn').textContent='🔍 Check Balance';
+  document.getElementById('checkBtn').disabled=false;
+  document.getElementById('cStatus').textContent=`✅ Done — ${cards.length} cards checked · ${errCount} ERR`;
+  toast(`✅ Done! ₹${totalAmt.toLocaleString('en-IN')} total${errCount>0?` · ${errCount} ERR`:''}`,errCount>0?'var(--amber)':'var(--green)');
 }
 
 function cDownload(){
-  let csv='Sr No,Gift Card No,Balance\n';
-  Object.values(cResults).forEach((r,i)=>csv+=`${i+1},${r.card},${r.invalid?'Invalid Gift Card':(r.balance??'')}\n`);
+  let csv='Sr No,Gift Card No,Balance,Retries\n';
+  cResults.forEach((r,i)=>{
+    const bal=r.invalid?'Invalid Gift Card':(r.error!==undefined?'ERR':(r.balance!==undefined?r.balance:''));
+    csv+=`${i+1},${r.card},${bal}\n`;
+  });
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='giftcard_balances.csv';a.click();
@@ -484,46 +509,20 @@ function cDownload(){
 }
 
 function cShareWA(){
-  let txt=`*Croma Gift Card Balances*\n\n`;
-  Object.values(cResults).forEach((r,i)=>txt+=`${i+1}. ${r.card} — ${r.invalid?'Invalid Gift Card':'₹'+(r.balance??'ERR')}\n`);
+  let txt=`*Croma Gift Card Balances* (${cResults.length} cards)\n\n`;
+  cResults.forEach((r,i)=>{
+    const bal=r.invalid?'Invalid Gift Card':(r.error!==undefined?'ERR':'₹'+(r.balance??'ERR'));
+    txt+=`${i+1}. ${r.card} — ${bal}\n`;
+  });
   if(txt.length>4000) txt=txt.slice(0,3900)+'\n...(truncated, use CSV)';
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
 
 function cClear(){
   if(!confirm('Clear all data and start fresh?'))return;
-  cResults={};
+  cResults=[];
   document.getElementById('cards').value='';
   document.getElementById('cTb').innerHTML='';
   document.getElementById('cTbl').style.display='none';
   document.getElementById('stats').style.display='none';
   document.getElementById('totalBox').style.display='none';
-  document.getElementById('cActions').style.display='none';
-  document.getElementById('prog').style.width='0';
-  document.getElementById('cStatus').textContent='';
-  document.getElementById('t').textContent='0';
-  document.getElementById('z').textContent='0';
-  document.getElementById('nz').textContent='0';
-  document.getElementById('iv').textContent='0';
-  document.getElementById('dup').textContent='0';
-  document.getElementById('totalAmt').textContent='₹0';
-  window.scrollTo(0,0);
-  toast('Cleared','var(--blue)');
-}
-</script>
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-}
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferredPrompt=e;
-  const b=document.getElementById('installBtn');if(b)b.style.display='inline-flex';
-});
-function installApp(){
-  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBtn').style.display='none';});}
-  else toast('Use browser menu → Add to Home Screen','var(--blue)');
-}
-</script>
-</body>
-</html>

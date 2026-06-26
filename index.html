@@ -98,6 +98,7 @@ button.btn:active{transform:scale(.96)}
 .b-red{background:var(--red);color:#fff}
 .b-purple{background:#7c3aed;color:#fff}
 .b-wa{background:#25d366;color:#fff}
+.b-orange{background:linear-gradient(135deg,#f97316,#ef4444);color:#fff}
 
 /* ===== TABLE ===== */
 table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
@@ -106,6 +107,7 @@ th{background:var(--bg-soft);color:var(--accent);font-size:12px;font-weight:700;
 td{background:transparent}
 tr:hover td{background:var(--card-hi)}
 td.bad{color:#fca5a5}
+td.err400{color:#fb923c;font-weight:700}
 .zero{color:#f87171;font-weight:700}.ok{color:#4ade80;font-weight:700}
 
 /* ===== MISC ===== */
@@ -120,6 +122,8 @@ td.bad{color:#fca5a5}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .toast.show{opacity:1}
 .foot{text-align:center;font-size:11px;color:var(--muted);opacity:.6;padding:24px 0 12px}
+.pulse{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 </style>
 </head>
 <body>
@@ -155,7 +159,7 @@ td.bad{color:#fca5a5}
     <span class="desc">Bulk check balance for all your gift cards in one go. Export CSV or share on WhatsApp.</span>
   </button>
 
-  <div class="foot">v3.0 · 🎁 Croma Tools</div>
+  <div class="foot">v3.1 · 🎁 Croma Tools</div>
 </div>
 
 <!-- ===== FORMATTER ===== -->
@@ -194,7 +198,11 @@ td.bad{color:#fca5a5}
     <textarea id="cards" placeholder="1001340043075899&#10;1001340040344056&#10;..."></textarea>
     <div class="row" id="cMainButtons">
       <button class="btn b-primary big" id="checkBtn" onclick="cRun()">🔍 Check Balance</button>
-      <button class="btn b-amber big" id="retryBtn" style="display:none;" onclick="cRetryErrors()">🔄 Retry Errors</button>
+    </div>
+    <!-- Retry buttons row - shown after check -->
+    <div class="row" id="retryRow" style="display:none">
+      <button class="btn b-orange" id="retry400Btn" style="display:none" onclick="cRetry400Auto()">⚡ Retry 400 Errors</button>
+      <button class="btn b-amber" id="retryErrBtn" style="display:none" onclick="cRetryErrors()">🔄 Retry Other Errors</button>
     </div>
     <div class="bar"><div id="prog"></div></div>
     <div id="cStatus" style="margin-top:8px;font-size:13px;color:var(--muted)"></div>
@@ -226,6 +234,7 @@ td.bad{color:#fca5a5}
 
 <script>
 const CHECK_API = "https://croma-app-1-31gtbzrnb-otherwise390-2311s-projects.vercel.app/api/check";
+const CONCURRENCY = 200;
 
 /* ===== Navigation ===== */
 function show(id){
@@ -343,140 +352,220 @@ function fClear(){
   toast('Cleared','var(--blue)');
 }
 const fIp=document.getElementById('fInput');
-fIp.value=localStorage.getItem('croma_last')||'';
+fIp.value=localStorage.getItem('croma_last')||''  ;
 fIp.addEventListener('input',()=>localStorage.setItem('croma_last',fIp.value));
 
 /* ===== CHECKER ENGINE ===== */
+let cResults = [];
 let dupSet = new Set();
-let cardsToProcess = [];
+let isRunning = false;
 
+/* Single card fetch — returns tagged result */
 async function cCheck(card){
   try{
-    const r=await fetch(CHECK_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card})});
-    return await r.json();
-  }catch(e){return {card,error:String(e)};}
+    const r = await fetch(CHECK_API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({card})
+    });
+    if(r.status === 400){
+      return {card, err400: true, error:'HTTP 400'};
+    }
+    const data = await r.json();
+    return data;
+  }catch(e){
+    return {card, error: String(e)};
+  }
+}
+
+/* Controlled concurrency runner — runs maxConcurrent fetches at a time */
+async function runWithConcurrency(cards, maxConcurrent, onResult){
+  const results = new Array(cards.length);
+  let nextIdx = 0;
+  async function worker(){
+    while(nextIdx < cards.length){
+      const idx = nextIdx++;
+      const res = await cCheck(cards[idx]);
+      results[idx] = res;
+      onResult(res, idx);
+    }
+  }
+  const workers = [];
+  for(let i = 0; i < Math.min(maxConcurrent, cards.length); i++) workers.push(worker());
+  await Promise.all(workers);
+  return results;
+}
+
+/* Rebuild the full table from cResults */
+function renderTable(){
+  const tb = document.getElementById('cTb');
+  tb.innerHTML = '';
+  let zero=0, nz=0, iv=0, totalAmt=0, err400=0, errOther=0;
+
+  cResults.forEach((r, idx)=>{
+    const isDup = dupSet.has(r.card);
+    const invalid = (r.status == null && r.expiry == null && !r.error && !r.err400);
+    let cell;
+
+    if(r.err400){
+      cell = `<td class="err400">⚡ 400 Error</td>`;
+      err400++;
+    } else if(r.error !== undefined){
+      cell = `<td class="bad">ERR</td>`;
+      errOther++;
+    } else if(invalid){
+      r.invalid = true; iv++;
+      cell = `<td class="bad">Invalid Gift Card</td>`;
+    } else {
+      const bal = r.balance;
+      if(bal === 0) zero++; else if(bal > 0){ nz++; totalAmt += bal; }
+      cell = `<td class="${bal > 0 ? 'ok' : 'zero'}">${bal !== undefined ? '₹'+bal.toLocaleString('en-IN') : 'ERR'}</td>`;
+    }
+
+    const tr = document.createElement('tr');
+    const dupBadge = isDup ? ` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>` : '';
+    tr.innerHTML = `<td>${idx+1}</td><td>${r.card}${dupBadge}</td>${cell}`;
+    tb.appendChild(tr);
+  });
+
+  document.getElementById('t').textContent = cResults.length;
+  document.getElementById('z').textContent = zero;
+  document.getElementById('nz').textContent = nz;
+  document.getElementById('iv').textContent = iv;
+  document.getElementById('totalAmt').textContent = '₹'+totalAmt.toLocaleString('en-IN');
+
+  /* Show/hide retry buttons */
+  const retry400Btn = document.getElementById('retry400Btn');
+  const retryErrBtn = document.getElementById('retryErrBtn');
+  const retryRow = document.getElementById('retryRow');
+
+  if(err400 > 0){
+    retry400Btn.style.display = 'block';
+    retry400Btn.textContent = `⚡ Retry ${err400} × 400 Errors`;
+  } else {
+    retry400Btn.style.display = 'none';
+  }
+
+  if(errOther > 0){
+    retryErrBtn.style.display = 'block';
+    retryErrBtn.textContent = `🔄 Retry ${errOther} Errors`;
+  } else {
+    retryErrBtn.style.display = 'none';
+  }
+
+  retryRow.style.display = (err400 > 0 || errOther > 0) ? 'flex' : 'none';
+
+  return {err400, errOther, totalAmt, zero, nz, iv};
+}
+
+function setButtonsLocked(locked){
+  document.getElementById('checkBtn').disabled = locked;
+  document.getElementById('retry400Btn').disabled = locked;
+  document.getElementById('retryErrBtn').disabled = locked;
 }
 
 async function cRun(){
-  const raw=document.getElementById('cards').value;
-  const allMatches=raw.match(/\d{16}/g)||[];
-  if(!allMatches.length){toast('No 16-digit numbers found','var(--red)');return;}
-  
-  const seen={}; dupSet.clear();
-  allMatches.forEach(c=>{seen[c]=(seen[c]||0)+1;if(seen[c]>1)dupSet.add(c);});
-  cardsToProcess=[...new Set(allMatches)];
-  
-  const dupCount=dupSet.size;
-  if(dupCount>0){
-    toast(`⚠️ ${dupCount} duplicate card(s) found & skipped`,'var(--amber)');
-  }
-  
-  cResults=[];
-  document.getElementById('cTb').innerHTML='';
-  document.getElementById('cTbl').style.display='table';
-  document.getElementById('stats').style.display='flex';
-  document.getElementById('totalBox').style.display='block';
-  document.getElementById('cActions').style.display='none';
-  document.getElementById('retryBtn').style.display='none';
-  document.getElementById('dup').textContent=dupCount;
+  if(isRunning) return;
+  const raw = document.getElementById('cards').value;
+  const allMatches = raw.match(/\d{16}/g) || [];
+  if(!allMatches.length){ toast('No 16-digit numbers found','var(--red)'); return; }
 
-  await processCardBatches(cardsToProcess);
+  const seen = {}; dupSet.clear();
+  allMatches.forEach(c=>{ seen[c]=(seen[c]||0)+1; if(seen[c]>1) dupSet.add(c); });
+  const unique = [...new Set(allMatches)];
+  const dupCount = dupSet.size;
+  if(dupCount > 0) toast(`⚠️ ${dupCount} duplicate card(s) found & skipped`,'var(--amber)');
+
+  cResults = unique.map(card=>({card, _pending:true}));
+
+  document.getElementById('cTbl').style.display = 'table';
+  document.getElementById('stats').style.display = 'flex';
+  document.getElementById('totalBox').style.display = 'block';
+  document.getElementById('cActions').style.display = 'none';
+  document.getElementById('retryRow').style.display = 'none';
+  document.getElementById('dup').textContent = dupCount;
+
+  await runBatch(unique, `Checking`);
 }
 
-async function processCardBatches(targetList) {
-  document.getElementById('checkBtn').disabled = true;
-  document.getElementById('retryBtn').disabled = true;
-  
-  const total = targetList.length;
-  let done=0, zero=0, nz=0, iv=0, totalAmt=0, errCount=0;
-  const batch=100;
+async function runBatch(targetCards, label){
+  isRunning = true;
+  setButtonsLocked(true);
+  const total = targetCards.length;
+  let done = 0;
 
-  for(let i=0; i<targetList.length; i+=batch){
-    const chunk=targetList.slice(i,i+batch);
-    const res=await Promise.all(chunk.map(cCheck));
-    
-    res.forEach(r=>{
-      // Agar purani list me ye card pehle se tha to update karein, nahi to naya push karein
-      const existingIndex = cResults.findIndex(item => item.card === r.card);
-      if (existingIndex !== -1) {
-        cResults[existingIndex] = r;
-      } else {
-        cResults.push(r);
-      }
-
-      done++;
-    });
-
-    // Live UI Refresh layout update
-    const tb=document.getElementById('cTb');
-    tb.innerHTML='';
-    zero=0; nz=0; iv=0; totalAmt=0; errCount=0;
-
-    cResults.forEach((r, idx) => {
-      const bal=r.balance;
-      const invalid=(r.status==null && r.expiry==null);
-      const isDup=dupSet.has(r.card);
-      let cell;
-
-      if(r.error!==undefined){
-        cell=`<td class="bad">ERR</td>`;
-        errCount++;
-      }else if(invalid){
-        r.invalid=true; iv++;
-        cell=`<td class="bad">Invalid Gift Card</td>`;
-      }else{
-        if(bal===0)zero++;else if(bal>0){nz++; totalAmt+=bal;}
-        cell=`<td class="${bal>0?'ok':'zero'}">${bal !== undefined ? '₹'+bal.toLocaleString('en-IN') : 'ERR'}</td>`;
-      }
-
-      const tr=document.createElement('tr');
-      const dupBadge=isDup?` <span style="background:#f59e0b;color:#1c1917;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:800">DUP</span>` : '';
-      tr.innerHTML=`<td>${idx+1}</td><td>${r.card}${dupBadge}</td>${cell}`;
-      tb.appendChild(tr);
-    });
-
-    document.getElementById('prog').style.width=(done/total*100)+'%';
-    document.getElementById('cStatus').textContent=`${done}/${total} checked`;
-    document.getElementById('t').textContent=cResults.length;
-    document.getElementById('z').textContent=zero;
-    document.getElementById('nz').textContent=nz;
-    document.getElementById('iv').textContent=iv;
-    document.getElementById('totalAmt').textContent='₹'+totalAmt.toLocaleString('en-IN');
-  }
-
-  document.getElementById('checkBtn').disabled = false;
-  document.getElementById('retryBtn').disabled = false;
-  document.getElementById('cActions').style.display='flex';
-
-  // Agar koi ERR card bacha hai to Manual Retry button show karein
-  if (errCount > 0) {
-    document.getElementById('retryBtn').style.display = 'inline-block';
-    document.getElementById('retryBtn').innerText = `🔄 Retry ${errCount} Errors`;
-    toast(`⚠️ Completed with ${errCount} errors. Tap 'Retry Errors' to check them manually.`,'var(--amber)');
-  } else {
-    document.getElementById('retryBtn').style.display = 'none';
-    toast(`✅ Checked ${total} card(s) · ₹${totalAmt.toLocaleString('en-IN')} total`);
-  }
-}
-
-async function cRetryErrors() {
-  // Sirf un cards ki list nikaalein jinka status abhi bhi 'error' (ERR) hai
-  const errorCards = cResults.filter(r => r.error !== undefined).map(r => r.card);
-  if (errorCards.length === 0) {
-    toast('No error cards left to retry','var(--blue)');
-    document.getElementById('retryBtn').style.display = 'none';
-    return;
-  }
-  
-  document.getElementById('cStatus').textContent = `🔄 Retrying ${errorCards.length} error cards...`;
   document.getElementById('prog').style.width = '0%';
-  
-  await processCardBatches(errorCards);
+
+  await runWithConcurrency(targetCards, CONCURRENCY, (res)=>{
+    /* Update cResults in-place */
+    const idx = cResults.findIndex(r => r.card === res.card);
+    if(idx !== -1) cResults[idx] = res; else cResults.push(res);
+
+    done++;
+    document.getElementById('prog').style.width = (done/total*100)+'%';
+    document.getElementById('cStatus').textContent = `${label}: ${done}/${total}`;
+
+    /* Incremental table refresh every 50 results or at end */
+    if(done % 50 === 0 || done === total) renderTable();
+  });
+
+  const {err400, errOther, totalAmt} = renderTable();
+  isRunning = false;
+  setButtonsLocked(false);
+  document.getElementById('cActions').style.display = 'flex';
+
+  if(err400 > 0 || errOther > 0){
+    const msg = err400 > 0
+      ? `⚠️ ${err400} × HTTP 400 errors — tap ⚡ Retry to auto-fix`
+      : `⚠️ ${errOther} errors — tap 🔄 Retry`;
+    toast(msg, 'var(--amber)');
+    document.getElementById('cStatus').textContent = `Done. ${err400} × 400 errors, ${errOther} other errors remaining.`;
+  } else {
+    toast(`✅ All ${cResults.length} cards checked · ₹${totalAmt.toLocaleString('en-IN')} total`);
+    document.getElementById('cStatus').textContent = `✅ Completed — ₹${totalAmt.toLocaleString('en-IN')} total`;
+  }
+}
+
+/* Auto-retry 400 errors in a loop until all cleared or max 10 rounds */
+async function cRetry400Auto(){
+  if(isRunning) return;
+  let round = 0;
+  const MAX_ROUNDS = 20;
+
+  while(round < MAX_ROUNDS){
+    const errorCards = cResults.filter(r => r.err400).map(r => r.card);
+    if(errorCards.length === 0){
+      toast('✅ All 400 errors resolved!', 'var(--green)');
+      document.getElementById('retryRow').style.display = 'none';
+      return;
+    }
+    round++;
+    document.getElementById('retry400Btn').textContent = `⚡ Retrying ${errorCards.length} × 400 (Round ${round})…`;
+    document.getElementById('cStatus').textContent = `🔄 Auto-retrying 400 errors — round ${round}/${MAX_ROUNDS}…`;
+    await runBatch(errorCards, `Retry400 R${round}`);
+
+    /* Small pause between rounds to avoid hammering */
+    await new Promise(res => setTimeout(res, 300));
+  }
+
+  const remaining = cResults.filter(r => r.err400).length;
+  if(remaining > 0){
+    toast(`⚠️ ${remaining} × 400 errors still remain after ${MAX_ROUNDS} rounds`, 'var(--amber)');
+  }
+}
+
+/* Retry non-400 general errors once */
+async function cRetryErrors(){
+  if(isRunning) return;
+  const errorCards = cResults.filter(r => r.error !== undefined && !r.err400).map(r => r.card);
+  if(!errorCards.length){ toast('No general errors to retry','var(--blue)'); return; }
+  document.getElementById('cStatus').textContent = `🔄 Retrying ${errorCards.length} error cards…`;
+  await runBatch(errorCards, 'RetryErr');
 }
 
 function cDownload(){
   let csv='Sr No,Gift Card No,Balance\n';
-  cResults.forEach((r,i)=>csv+=`${i+1},${r.card},${r.invalid?'Invalid Gift Card':(r.balance??'')}\n`);
+  cResults.forEach((r,i)=>csv+=`${i+1},${r.card},${r.invalid?'Invalid Gift Card':r.err400?'400 Error':(r.error?'Error':(r.balance??''  ))}\n`);
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='giftcard_balances.csv';a.click();
@@ -485,7 +574,7 @@ function cDownload(){
 
 function cShareWA(){
   let txt=`*Croma Gift Card Balances* (${cResults.length} cards)\n\n`;
-  cResults.forEach((r,i)=>txt+=`${i+1}. ${r.card} — ${r.invalid?'Invalid Gift Card':'₹'+(r.balance??'ERR')}\n`);
+  cResults.forEach((r,i)=>txt+=`${i+1}. ${r.card} — ${r.invalid?'Invalid Gift Card':r.err400?'400 Error':r.error?'ERR':'₹'+(r.balance??'ERR'  )}\n`);
   if(txt.length>4000) txt=txt.slice(0,3900)+'\n...(truncated, use CSV)';
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
@@ -493,14 +582,14 @@ function cShareWA(){
 function cClear(){
   if(!confirm('Clear all data and start fresh?'))return;
   cResults=[];
-  cardsToProcess=[];
+  dupSet.clear();
   document.getElementById('cards').value='';
   document.getElementById('cTb').innerHTML='';
   document.getElementById('cTbl').style.display='none';
   document.getElementById('stats').style.display='none';
   document.getElementById('totalBox').style.display='none';
   document.getElementById('cActions').style.display='none';
-  document.getElementById('retryBtn').style.display='none';
+  document.getElementById('retryRow').style.display='none';
   document.getElementById('prog').style.width='0';
   document.getElementById('cStatus').textContent='';
   document.getElementById('t').textContent='0';

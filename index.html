@@ -1,1 +1,29 @@
-HHHHH
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Service Closed</title>
+  <script>
+    // Phone se service worker aur cache ko permanently uda dega
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) caches.delete(name);
+      });
+    }
+    localStorage.clear();
+    sessionStorage.clear();
+    alert("Yeh tool permanently band ho chuka hai.");
+    window.location.href = "https://google.com";
+  </script>
+</head>
+<body style="background:#111; color:#fff; text-align:center; padding:50px; font-family:sans-serif;">
+  <h2>⚠️ Tool Discontinued</h2>
+</body>
+</html>

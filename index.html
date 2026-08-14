@@ -1,29 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Service Closed</title>
+  <title>App Closed</title>
   <script>
-    // Phone se service worker aur cache ko permanently uda dega
+    // 1. Saare service workers ko unregister karega
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.unregister();
+        for (let reg of registrations) {
+          reg.unregister();
         }
       });
     }
+    // 2. Phone ka offline cache delete karega
     if ('caches' in window) {
       caches.keys().then(function(names) {
-        for (let name of names) caches.delete(name);
+        for (let name of names) {
+          caches.delete(name);
+        }
       });
     }
+    // 3. Storage clear
     localStorage.clear();
     sessionStorage.clear();
-    alert("Yeh tool permanently band ho chuka hai.");
-    window.location.href = "https://google.com";
   </script>
 </head>
-<body style="background:#111; color:#fff; text-align:center; padding:50px; font-family:sans-serif;">
-  <h2>⚠️ Tool Discontinued</h2>
+<body style="background:#000; color:#fff; text-align:center; padding-top:100px; font-family:sans-serif;">
+  <h1>⚠️ Yeh App Permanently Band Ho Chuka Hai</h1>
 </body>
 </html>
